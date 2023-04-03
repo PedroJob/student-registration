@@ -43,46 +43,44 @@ int main()
 
             aluno *novoaluno = menu_aluno();
             aluno *novoaluno_copia = novo_aluno(novoaluno->codigo, novoaluno->nome, novoaluno->cpf);
-            add_aluno(novoperiodo->alunos, novoaluno);
 
-            printf("\nInsira as disciplinas que esse aluno participa: \n");
-            disciplina *nova = menu_disciplina();
-            disciplina *nova_copia = nova_disciplina(nova->codigo, nova->nome, nova->professor, nova->creditos);
-
-            // obriga a adicionar uma disciplina (opcional)
-
-            if (buscar_disciplina(novoperiodo->disciplinas, nova->codigo) == NULL)
+            if (buscar_aluno(novoperiodo->alunos, novoaluno->codigo) != NULL)
             {
                 system("clear");
-                add_disciplina(novoperiodo->disciplinas, nova);
+                printf("*O aluno ja existe*");
+                break;
             }
-            add_aluno(nova->alunos, novoaluno_copia);
-            add_disciplina(novoaluno->disciplinas, nova_copia);
 
-            int exit = 0;
+            add_aluno(novoperiodo->alunos, novoaluno_copia);
+            system("clear");
+            // obriga a adicionar uma disciplina
+            printf("\nInsira as disciplinas que esse aluno participa: \n");
+            int exit = 1;
 
             do
             {
-                printf("\ndeseja adicionar mais uma? (1 - sim, 2 - nao)\n");
-                scanf("%d", &exit);
-
                 if (exit == 1)
                 {
-                    system("clear");
-                    nova = menu_disciplina();
-                    nova_copia = nova_disciplina(nova->codigo, nova->nome, nova->professor, nova->creditos);
+                    disciplina *nova = menu_disciplina();
+                    disciplina *nova_copia = nova_disciplina(nova->codigo, nova->nome, nova->professor, nova->creditos);
                     if (buscar_disciplina(novoperiodo->disciplinas, nova->codigo) == NULL)
                     {
-                        system("clear");
                         add_disciplina(novoperiodo->disciplinas, nova);
+                        add_aluno(nova->alunos, novoaluno);
                     }
-                    add_disciplina(novoaluno->disciplinas, nova_copia);
-                    add_aluno(nova->alunos, novoaluno);
+                    else
+                    {
+                        add_aluno(buscar_disciplina(novoperiodo->disciplinas, nova->codigo)->alunos, novoaluno);
+                    }
+                    add_disciplina(novoaluno_copia->disciplinas, nova_copia);
                 }
                 else if (exit != 2 && exit != 1)
                 {
                     printf("\n*digite uma opcao valida*\n");
                 }
+                printf("\ndeseja adicionar mais uma? (1 - sim, 2 - nao)\n");
+                scanf("%d", &exit);
+                system("clear");
             } while (exit != 2);
 
             break;
@@ -214,7 +212,9 @@ int main()
         default:
             break;
         }
-
+        
+        system("read -p 'Aperte Enter para continuar...' var");
+        system("clear");
         printf("\n*periodo atual: %.1f*\n", novoperiodo->periodo);
         menu();
         scanf("%d", &opt);

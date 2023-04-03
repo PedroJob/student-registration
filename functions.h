@@ -87,20 +87,27 @@ int recuperar_txt(lista_periodos *lista);
 
 void menu()
 {
-    printf("\n  O que deseja fazer agora?\n");
+    printf("=============================================\n");
+    printf("\nO que deseja fazer agora?\n");
+    printf("\n#ADICIONAR");
     printf("\n1 - Adicionar novo periodo");
-    printf("\n2 - Adicionar novo aluno");
+    printf("\n2 - Adicionar novo aluno\n");
+    printf("\n#LISTAR");
     printf("\n3 - Listar disciplinas de um aluno");
     printf("\n4 - Listar disciplinas do periodo");
     printf("\n5 - Listar alunos de uma disciplina");
-    printf("\n6 - Listar alunos do periodo");
+    printf("\n6 - Listar alunos do periodo\n");
+    printf("\n#REMOVER");
     printf("\n7 - Remover aluno de uma disciplina");
     printf("\n8 - Remover aluno do periodo");
-    printf("\n9 - Remover disciplina do periodo");
+    printf("\n9 - Remover disciplina do periodo\n");
+    printf("\n#OUTROS");
     printf("\n10 - Acessar periodo anterior");
     printf("\n11 - Remover periodo");
     printf("\n12 - Sair e salvar\n");
+    printf("\n=============================================");
     printf("\ndigite a opcao desejada: ");
+
     return;
 }
 
@@ -162,7 +169,7 @@ int recuperar_txt(lista_periodos *lista)
     int codigo_aluno = 0, codigo_disciplina = 0, creditos = 0;
     long int cpf = 0;
     float valor = 0.0;
-    char buffer[500], nome_disci[256], nome_aluno[256], professor[256];
+    char buffer[20], nome_disci[256], nome_aluno[256], professor[256];
 
     periodo *periodo_atual = lista->last; 
     aluno *aluno_atual = NULL; 
@@ -199,10 +206,23 @@ int recuperar_txt(lista_periodos *lista)
                     break; 
                 }
                 fscanf(fptr, "%s %d %d\n", professor, &codigo_disciplina, &creditos);
+
+                aluno *aluno_copia = novo_aluno(aluno_atual->codigo, aluno_atual->nome, aluno_atual->cpf);
                 disciplina *nova = nova_disciplina(codigo_disciplina, nome_disci, professor, creditos); 
-                add_aluno(nova->alunos, novo_aluno(aluno_atual->codigo, aluno_atual->nome, aluno_atual->cpf)); 
-                add_disciplina(periodo_atual->disciplinas, nova);
                 add_disciplina(aluno_atual->disciplinas,  nova_disciplina(codigo_disciplina, nome_disci, professor, creditos));
+
+                if(buscar_disciplina(periodo_atual->disciplinas, codigo_disciplina) == NULL) //não achou disciplina
+                {
+                    system("clear");
+                    add_disciplina(periodo_atual->disciplinas, nova); //adiciona no periodo
+                    add_aluno(nova->alunos, aluno_copia); //adiciona aluno na disciplina nova
+                    continue;
+                }
+                else{
+                    //adiciona aluno na disciplina já existente
+                    add_aluno(buscar_disciplina(periodo_atual->disciplinas, codigo_disciplina)->alunos, aluno_copia);
+                    continue;
+                }
             }while(!feof(fptr));
         }
     } while (!feof(fptr));
@@ -230,7 +250,7 @@ void pop_aluno(lista_alunos *lista, int codigo)
         return;
     }
     // primeiro da lista
-    if ((finder->codigo = codigo))
+    if ((finder->codigo == codigo))
     {
         lista->head = finder->prox;
         free(finder);
@@ -246,6 +266,7 @@ void pop_aluno(lista_alunos *lista, int codigo)
     if (finder == NULL)
     {
         printf("\n*o elemento nao foi encontrado*\n");
+        free(finder);
         return;
     }
 
@@ -265,7 +286,7 @@ void pop_disciplina(lista_disciplinas *lista, int codigo)
         return;
     }
     // primeiro da lista
-    if ((finder->codigo = codigo))
+    if ((finder->codigo == codigo))
     {
         lista->head = finder->prox;
         free(finder);
@@ -281,6 +302,7 @@ void pop_disciplina(lista_disciplinas *lista, int codigo)
     if (finder == NULL)
     {
         printf("\n*o elemento nao foi encontrado*\n");
+        free(finder); 
         return;
     }
 
@@ -301,7 +323,7 @@ void pop_periodo(lista_periodos *lista, float valor)
         return;
     }
     // primeiro da lista
-    if ((finder->periodo = valor))
+    if ((finder->periodo == valor))
     {
         lista->head = finder->prox;
         free(finder);
@@ -317,6 +339,7 @@ void pop_periodo(lista_periodos *lista, float valor)
     if (finder == NULL)
     {
         printf("\n*o elemento nao foi encontrado*\n");
+        free(finder);
         return;
     }
 
@@ -332,10 +355,11 @@ void print_disciplinas(lista_disciplinas *lista)
 
     while (finder != NULL)
     {
-        printf("\n\n%d - %s", (finder->codigo), (finder->nome));
+        printf("\nnome: %s | codigo: %d | professor: %s | creditos: %d", (finder->nome), (finder ->codigo), (finder->professor), (finder->creditos));
         finder = finder->prox;
     }
 
+    printf("\n");
     free(finder);
 
     return;
@@ -347,10 +371,11 @@ void print_alunos(lista_alunos *lista)
 
     while (finder != NULL)
     {
-        printf("\n\n%d - %s", (finder->codigo), (finder->nome));
+        printf("\nnome: %s | codigo: %d | cpf: %ld", (finder->nome), (finder ->codigo), (finder->cpf));
         finder = finder->prox;
     }
 
+    printf("\n");
     free(finder);
 
     return;
